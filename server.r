@@ -18,7 +18,7 @@ shinyServer(function(input, output){
     'Alpental'='http://www.turns-all-year.com/woptelemetry.php?id=alpental'
     )
   
-  fieldTypes <- c('Wind.Max'='MPH', 'Wind.Avg'='MPH', 'Temp'='TEMP', 'RH'='RH', 'Total.Snow'='SNOW_DEPTH', 'Hour.Prec'='HOUR', 'Hr24.Snow'='DAY', 'Wind.Dir'='DIR')
+  
 
   ## As a side-effect
 datasetCache <- reactive(function() {
@@ -26,7 +26,7 @@ datasetCache <- reactive(function() {
     if(!is.null(input$dataset)){
       for(d in input$dataset){
         if(is.null(downloads[[d]])){
-          downloads[[d]] <- mungeNWAC(readLines(sites[[d]], warn=FALSE), smooth=TRUE)
+          downloads[[d]] <- mungeNWAC(readLines(sites[[d]], warn=FALSE), smooth=input$smooth)
           message('download triggered')
         }
          if(is.null(bound)) {
@@ -39,6 +39,7 @@ datasetCache <- reactive(function() {
     }
     bound <<- bound
     downloads <<- downloads
+  print(bound)
     downloads
   })
 
@@ -49,7 +50,7 @@ output$datasetControls <- reactiveUI(function() {
   for(d in input$dataset){
     choices <- c(choices, prettyifynames(names(dl[[d]]$tab)))
   }
-  checkboxGroupInput('series', "Choose series", choices)
+  if(!is.null(input$dataset)) checkboxGroupInput('series', "Choose series", choices)
 })
 
 ## output$datasetControls <- reactiveUI(function() {
@@ -76,6 +77,7 @@ output$datasetControls <- reactiveUI(function() {
   output$hastemp_precip <- reactive(function(){testFields(c('TEMP', 'HOUR'))})
   output$hassnowbase <- reactive(function(){testFields(c('SNOW_DEPTH', 'DAY'))})
   output$haswind <- reactive(function(){testFields(c('DIR', 'MPH'))})
+  output$hasother <- reactive(function(){testFields(c('other', 'other'))})
 
   
   
@@ -124,6 +126,10 @@ output$datasetControls <- reactiveUI(function() {
                        lattice1=function(f){xyplot(f, bound, type='b') + layer(panel.abline(h=12, col='red'))},
                        lattice2=function(f){xyplot(as.formula(f), bound, type='l', ylim=c(0, 140))})})
        
+   output$plot_other <- reactivePlot(function(){
+       makeDoubleChart(c('other', 'other'),
+                       lattice1=function(f){xyplot(f, bound, type='l')},
+                       lattice2=function(f){xyplot(NA~NA, type='l')})})
   
        
  

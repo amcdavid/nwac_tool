@@ -11,7 +11,11 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
     checkboxGroupInput("dataset", "Choose telemetry sites:", 
                 choices = c('Hurricane Ridge', 'Mount Baker', 'Washington Pass', 'Mazama', 'Mission Ridge', 'Stevens 2', 'Stevens Ski', 'Alpental', 'Snoqualmie')),
-    uiOutput("datasetControls")
+    uiOutput("datasetControls"),
+    checkboxInput('smooth', 'Kill spikes?', value=TRUE),
+      wellPanel(
+    p('Source code on ', a('github', href='https://github.com/amcdavid/nwac_tool'))
+    )
   ),
   
   # Show a summary of the dataset and an HTML table with the requested
@@ -27,9 +31,16 @@ shinyUI(pageWithSidebar(
  
     conditionalPanel(condition = "output.hassnowbase",
                      h4('Snow'),
-       plotOutput(outputId = "plot_snow"))
+       plotOutput(outputId = "plot_snow")),
+
+   conditionalPanel(condition = "output.hasother",
+                     h4('Other'),
+       plotOutput(outputId = "plot_other"))
  
     ##, conditionalPanel(condition = "output.rh",
     ##   plotOutput(outputId = "plot_rh"))
+ 
   )
+  
+
 ))
